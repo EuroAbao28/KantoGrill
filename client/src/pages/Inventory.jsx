@@ -518,7 +518,7 @@ function Inventory() {
                 </button>
                 <button
                   onClick={toggleDeleteMOdal}
-                  className="flex-1 py-2 text-base text-white transition-all bg-red-500 rounded-sm shadow-sm shadow cursor-pointer active:scale-95 ">
+                  className="flex-1 py-2 text-base text-white transition-all bg-red-500 rounded-sm shadow-sm cursor-pointer active:scale-95 ">
                   Delete
                 </button>
               </div>
