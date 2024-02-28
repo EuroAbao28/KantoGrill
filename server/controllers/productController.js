@@ -130,9 +130,7 @@ const deleteItem = async (req, res) => {
 
 const getAllItem = async (req, res) => {
   try {
-    console.log("QUERY", req.query);
-
-    const { category, status, sortBy, sortOrder } = req.query;
+    const { category, status, sortBy, sortOrder, searchInput } = req.query;
 
     let filter = {};
 
@@ -144,9 +142,21 @@ const getAllItem = async (req, res) => {
       filter.status = status;
     }
 
-    const response = await productModel
-      .find(filter)
-      .sort({ [sortBy]: sortOrder === "descending" ? -1 : 1 });
+    let query = productModel.find(filter);
+
+    // Add search functionality using regex
+    if (searchInput) {
+      filter.name = { $regex: new RegExp(searchInput, "i") };
+
+      // then remove the searchInput because you have now a filter.name
+      delete filter.searchInput;
+
+      query = query.find(filter);
+    }
+
+    const response = await query.sort({
+      [sortBy]: sortOrder === "descending" ? -1 : 1,
+    });
 
     return res.status(200).json(response);
   } catch (error) {

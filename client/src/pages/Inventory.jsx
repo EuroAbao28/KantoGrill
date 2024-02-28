@@ -18,10 +18,11 @@ function Inventory() {
     status: "",
     sortBy: "createdAt",
     sortOrder: "descending",
+    searchInput: "",
   });
 
-  const { productData, isGetLoading, getError, getRefresh, setGetRefresh } =
-    useGetAllProducts(filterOptions);
+  const { getProductsFunction, productData, isGetLoading } =
+    useGetAllProducts();
   const {
     createProductFunction,
     isCreateLoading,
@@ -32,8 +33,6 @@ function Inventory() {
     useDeleteProduct();
   const { updateProductFunction, isUpdateLoading, updateError } =
     useUpdateProduct();
-  const { searchProductFunction, isSearchLoading, searchError } =
-    useSearchProduct();
 
   // modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -42,12 +41,10 @@ function Inventory() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // for selecting product to the table
-  const [selectedIndex, setSelectedIndex] = useState("");
   const [selectedProduct, setSelectProduct] = useState({});
 
   // for search
   const [searchInput, setSearchInput] = useState("");
-  const [searchResult, setSearchResult] = useState([]);
 
   const [formProduct, setFormProduct] = useState({
     name: "",
@@ -69,9 +66,13 @@ function Inventory() {
     productImageURL: null,
   });
 
+  // get all products
+  useEffect(() => {
+    getProductsFunction(filterOptions);
+  }, [filterOptions]);
+
   // for selecting product to the table
   const handleSelectProduct = (item, index) => {
-    setSelectedIndex(index + 1);
     setSelectProduct(item);
     setUpdateForm({
       name: item.name,
@@ -176,7 +177,8 @@ function Inventory() {
     try {
       const response = await createProductFunction(formProduct);
 
-      setGetRefresh(!getRefresh);
+      // refresh the table
+      getProductsFunction(filterOptions);
 
       setIsCreateModalOpen(false);
       toast.success(response);
@@ -197,9 +199,11 @@ function Inventory() {
         updateForm
       );
 
-      setGetRefresh(!getRefresh);
       setSelectProduct(response.data.updatedProduct);
       setIsEditModalOpen(false);
+
+      // refresh the table
+      getProductsFunction(filterOptions);
 
       toast.success(response.data.message);
     } catch (error) {
@@ -217,7 +221,9 @@ function Inventory() {
       setSelectProduct({});
       setSelectedIndex("");
 
-      setGetRefresh(!getRefresh);
+      // refresh the table
+      getProductsFunction(filterOptions);
+
       setIsDeleteModalOpen(false);
       toast.success(response);
     } catch (error) {
@@ -227,20 +233,20 @@ function Inventory() {
   };
 
   // search product
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
-    console.log("search clicked");
-
-    try {
-      const response = await searchProductFunction(searchInput);
-
-      setSearchResult(response);
-      console.log(response);
-    } catch (error) {
-      toast.error(error);
-      console.log(error);
-    }
+    setFilterOptions((prevState) => ({
+      ...prevState,
+      searchInput: searchInput,
+    }));
   };
+
+  // clear the searchInput in filter if the search input is empty
+  useEffect(() => {
+    if (searchInput === "") {
+      setFilterOptions((prevState) => ({ ...prevState, searchInput: "" }));
+    }
+  }, [searchInput]);
 
   // filter change
   const handleFilterChange = (e) => {
@@ -250,24 +256,7 @@ function Inventory() {
       ...prevState,
       [name]: value,
     }));
-
-    if (searchInput !== "") {
-      setSearchInput("");
-    }
   };
-
-  // trigger refresh by filter options change
-  useEffect(() => {
-    // console.log(filterOptions);
-    setGetRefresh(!getRefresh);
-  }, [filterOptions]);
-
-  // clear the search result if the input is empty
-  useEffect(() => {
-    if (searchInput === "") {
-      setSearchResult([]);
-    }
-  }, [searchInput]);
 
   return (
     <>
@@ -284,6 +273,7 @@ function Inventory() {
                 type="text"
                 placeholder="Search an item"
                 value={searchInput}
+                name="searchInput"
                 onChange={(e) => setSearchInput(e.target.value)}
               />
             </form>
@@ -390,77 +380,37 @@ function Inventory() {
                     </tr>
                   </thead>
                   <tbody className="">
-                    {searchResult.length > 0
-                      ? searchResult.map((item, index) => (
-                          <tr
-                            onClick={() => handleSelectProduct(item, index)}
-                            key={item._id}
-                            className={className(
-                              selectedIndex === index + 1
-                                ? "bg-gray-100 hover:bg-gray-100"
-                                : "hover:bg-gray-50",
-                              "text-sm border-t border-gray-300 cursor-pointer hover:bg-slate-50"
-                            )}>
-                            <td className="px-4 text-xs font-bold">
-                              {index + 1}
-                            </td>
-                            <td className="py-2 ">{item.name}</td>
-                            <td className="whitespace-nowrap">
-                              ₱ {item.price?.toFixed(2)}
-                            </td>
+                    {productData?.map((item, index) => (
+                      <tr
+                        onClick={() => handleSelectProduct(item, index)}
+                        key={item._id}
+                        className={className(
+                          selectedProduct._id === item._id
+                            ? "bg-gray-100 hover:bg-gray-100"
+                            : "hover:bg-gray-50",
+                          "text-sm border-t border-gray-300 cursor-pointer hover:bg-slate-50"
+                        )}>
+                        <td className="px-4 text-xs font-bold">{index + 1}</td>
+                        <td className="py-2 ">{item.name}</td>
+                        <td className="whitespace-nowrap">
+                          ₱ {item.price?.toFixed(2)}
+                        </td>
 
-                            <td>{item.stocks}</td>
-                            <td>
-                              <p
-                                className={className(
-                                  item.status === "active"
-                                    ? "bg-green-100 text-green-600"
-                                    : "bg-red-100 text-red-600",
-                                  "w-fit text-center px-2 py-1 rounded-sm text-xs capitalize "
-                                )}>
-                                {item.status}
-                              </p>
-                            </td>
-                            <td>
-                              {new Date(item.createdAt).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))
-                      : productData?.map((item, index) => (
-                          <tr
-                            onClick={() => handleSelectProduct(item, index)}
-                            key={item._id}
+                        <td>{item.stocks}</td>
+                        <td>
+                          <p
                             className={className(
-                              selectedIndex === index + 1
-                                ? "bg-gray-100 hover:bg-gray-100"
-                                : "hover:bg-gray-50",
-                              "text-sm border-t border-gray-300 cursor-pointer hover:bg-slate-50"
+                              item.status === "active"
+                                ? "bg-green-100 text-green-600"
+                                : "bg-red-100 text-red-600",
+                              "w-fit text-center px-2 py-1 rounded-sm text-xs capitalize"
                             )}>
-                            <td className="px-4 text-xs font-bold">
-                              {index + 1}
-                            </td>
-                            <td className="py-2 ">{item.name}</td>
-                            <td className="whitespace-nowrap">
-                              ₱ {item.price?.toFixed(2)}
-                            </td>
-
-                            <td>{item.stocks}</td>
-                            <td>
-                              <p
-                                className={className(
-                                  item.status === "active"
-                                    ? "bg-green-100 text-green-600"
-                                    : "bg-red-100 text-red-600",
-                                  "w-fit text-center px-2 py-1 rounded-sm text-xs capitalize"
-                                )}>
-                                {item.status}
-                              </p>
-                            </td>
-                            <td>
-                              {new Date(item.createdAt).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
+                            {item.status}
+                          </p>
+                        </td>
+                        <td>{new Date(item.createdAt).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
