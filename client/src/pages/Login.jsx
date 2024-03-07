@@ -4,11 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { FaFire } from "react-icons/fa";
 import { loginRoute } from "../utils/APIRoutes";
 import toast from "react-hot-toast";
-import { useUserContext } from "../context/UserContextProvider";
 
 function Login() {
   const navigate = useNavigate();
-  const { setUser } = useUserContext;
 
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({

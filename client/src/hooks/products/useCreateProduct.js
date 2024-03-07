@@ -1,5 +1,5 @@
 import axios from "axios";
-import { productRoute } from "../utils/APIRoutes";
+import { productRoute } from "../../utils/APIRoutes";
 import toast from "react-hot-toast";
 import { useState } from "react";
 

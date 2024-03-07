@@ -1,5 +1,5 @@
 import axios from "axios";
-import { productRoute } from "../utils/APIRoutes";
+import { productRoute } from "../../utils/APIRoutes";
 import { useState } from "react";
 
 const useGetAllProducts = () => {

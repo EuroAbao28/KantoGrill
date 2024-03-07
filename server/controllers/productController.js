@@ -63,8 +63,6 @@ const updateItem = async (req, res) => {
     const { id } = req.params;
     const { name, price, stocks, category, status } = req.body;
 
-    console.log("BODY", req.body);
-
     let updatedImageUrl = "";
 
     const isProductExist = await productModel.findById(id);

@@ -4,13 +4,13 @@ import { HiOutlineSearch, HiOutlineFilter, HiPlus } from "react-icons/hi";
 import axios from "axios";
 import { productRoute } from "../utils/APIRoutes";
 import toast from "react-hot-toast";
-import useGetAllProducts from "../hooks/useGetAllProducts";
+import useGetAllProducts from "../hooks/products/useGetAllProducts";
 import sampleImage from "../images/dummy.jpg";
 import className from "classnames";
-import useDeleteProduct from "../hooks/useDeleteProduct";
-import useCreateProduct from "../hooks/useCreateProduct";
-import useUpdateProduct from "../hooks/useUpdateProduct";
-import useSearchProduct from "../hooks/userSearchProduct";
+import useDeleteProduct from "../hooks/products/useDeleteProduct";
+import useCreateProduct from "../hooks/products/useCreateProduct";
+import useUpdateProduct from "../hooks/products/useUpdateProduct";
+import useSearchProduct from "../hooks/products/userSearchProduct";
 
 function Inventory() {
   const [filterOptions, setFilterOptions] = useState({
@@ -219,7 +219,6 @@ function Inventory() {
 
       // clear data
       setSelectProduct({});
-      setSelectedIndex("");
 
       // refresh the table
       getProductsFunction(filterOptions);
@@ -391,7 +390,7 @@ function Inventory() {
                           "text-sm border-t border-gray-300 cursor-pointer hover:bg-slate-50"
                         )}>
                         <td className="px-4 text-xs font-bold">{index + 1}</td>
-                        <td className="py-2 ">{item.name}</td>
+                        <td className="py-2">{item.name}</td>
                         <td className="whitespace-nowrap">
                           ₱ {item.price?.toFixed(2)}
                         </td>
@@ -430,33 +429,33 @@ function Inventory() {
               <h1 className="mt-4 text-xl font-semibold">
                 {selectedProduct.name}
               </h1>
-              <div className="flex items-center mt-4">
+              <div className="flex items-center mt-2">
                 <p className="w-1/3 text-sm font-semibold">Price</p>
                 <p>₱ {selectedProduct.price}.00</p>
               </div>
-              <div className="flex mt-2">
+              <div className="flex mt-1">
                 <p className="w-1/3 text-sm font-semibold">Stocks</p>
                 <p>{selectedProduct.stocks}</p>
               </div>
-              <div className="flex mt-2">
+              <div className="flex mt-1">
                 <p className="w-1/3 text-sm font-semibold">Status</p>
                 <p className="capitalize">{selectedProduct.status}</p>
               </div>
-              <div className="flex mt-2">
+              <div className="flex mt-1">
                 <p className="w-1/3 text-sm font-semibold">Category</p>
                 <p className="capitalize">
                   {selectedProduct.category.replace(/_/g, " ")}
                 </p>
               </div>
-              <div className="flex mt-2">
+              <div className="flex mt-1">
                 <p className="w-1/3 text-sm font-semibold">Date Added</p>
                 <p>{new Date(selectedProduct.createdAt).toLocaleString()}</p>
               </div>
-              <div className="flex mt-2">
+              <div className="flex mt-1">
                 <p className="w-1/3 text-sm font-semibold">Updated At</p>
                 <p>{new Date(selectedProduct.updatedAt).toLocaleString()}</p>
               </div>
-              <div className="flex mt-2">
+              <div className="flex mt-1">
                 <p className="w-1/3 text-sm font-semibold">Added By</p>
                 <p>{selectedProduct.addedBy}</p>
               </div>

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import { productRoute } from "../utils/APIRoutes";
+import { productRoute } from "../../utils/APIRoutes";
 
 const useUpdateProduct = () => {
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);

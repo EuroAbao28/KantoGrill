@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { productRoute } from "../utils/APIRoutes";
+import { productRoute } from "../../utils/APIRoutes";
 
 const useDeleteProduct = () => {
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
