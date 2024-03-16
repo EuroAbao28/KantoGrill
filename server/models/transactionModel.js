@@ -7,12 +7,15 @@ const orderedItemsSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
 });
 
-const transactionSchema = new mongoose.Schema({
-  totalPrice: { type: String, required: true },
-  amountPaid: { type: String, required: true },
-  change: { type: String, required: true },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  orderedItems: [orderedItemsSchema],
-});
+const transactionSchema = new mongoose.Schema(
+  {
+    totalPrice: { type: Number, required: true },
+    amountPaid: { type: Number, required: true },
+    change: { type: Number, required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    orderedItems: [orderedItemsSchema],
+  },
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("Transaction", transactionSchema);

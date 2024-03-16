@@ -338,6 +338,7 @@ function Inventory() {
                     onChange={handleFilterChange}
                     className="p-1 rounded-sm outline outline-1 outline-gray-300">
                     <option value="createdAt">Date</option>
+                    <option value="sales">Sales</option>
                     <option value="price">Price</option>
                     <option value="stocks">Stocks</option>
                   </select>
@@ -374,6 +375,7 @@ function Inventory() {
                       <th className="py-2 ">Name</th>
                       <th>Price</th>
                       <th>Stocks</th>
+                      <th>Sales</th>
                       <th>Status</th>
                       <th>Date added</th>
                     </tr>
@@ -396,6 +398,7 @@ function Inventory() {
                         </td>
 
                         <td>{item.stocks}</td>
+                        <td>{item.sales}</td>
                         <td>
                           <p
                             className={className(

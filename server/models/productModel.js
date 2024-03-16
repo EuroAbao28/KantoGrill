@@ -15,6 +15,7 @@ const productSchema = mongoose.Schema(
     name: reqString,
     price: reqNum,
     stocks: reqNum,
+    sales: { type: Number, default: 0 },
     category: reqString,
     status: {
       type: String,
