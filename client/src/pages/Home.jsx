@@ -27,11 +27,12 @@ function Home() {
 
       const updatedOrder = { ...order };
 
-      //
+      // find the product id and remove it
       updatedOrder.orderedItems = updatedOrder.orderedItems.filter(
         (orderedItem) => orderedItem.productId !== item.productId
       );
 
+      // recalculate and update the updatedOrder price
       updatedOrder.totalPrice = updatedOrder.orderedItems.reduce(
         (sum, orderedItems) => sum + orderedItems.price * orderedItems.quantity,
         0
@@ -41,6 +42,7 @@ function Home() {
     } else {
       const updatedOrder = { ...order };
 
+      // decrement the product quantity
       updatedOrder.orderedItems[index].quantity -= 1;
 
       // itirate all the item and sum all the total price by price x quantity
@@ -64,6 +66,8 @@ function Home() {
   };
 
   const handlePay = async () => {
+    if (order.orderedItems.length === 0) return toast.error("No current order");
+
     const transactionDetails = { ...order };
 
     transactionDetails.user = user._id;
@@ -75,6 +79,9 @@ function Home() {
 
       console.log(transactionDetails);
       toast.success(response.data.message);
+
+      // clear all
+      handleClearAll();
     } catch (error) {
       console.log(transactionDetails);
       toast.error(error);
@@ -82,17 +89,19 @@ function Home() {
     }
   };
 
+  // run this to update the change real time
   useEffect(() => {
     setChange(amountPaid - order.totalPrice);
   }, [amountPaid, order]);
 
+  // reset the amount paid if there is no order
   useEffect(() => {
     if (order.orderedItems.length === 0) return setAmountPaid("");
   }, [order]);
 
-  useEffect(() => {
-    console.log(order);
-  }, [order]);
+  // useEffect(() => {
+  //   console.log(order);
+  // }, [order]);
 
   return (
     <div className="flex flex-1 gap-4 p-4">
@@ -151,22 +160,6 @@ function Home() {
                 </button>
               </div>
             ))}
-            {/* <div className="flex items-center w-full gap-2 px-3 py-2 odd:bg-slate-100">
-              <p className="mr-2 text-xs font-bold ">1</p>
-              <p className="flex-1 text-sm line-clamp-1 hover:line-clamp-none">
-                Product Name
-              </p>
-              <p className="text-xs font-light ">Qty</p>
-              <input
-                type="number"
-                className="w-8 py-1 text-xs text-center rounded-sm outline outline-1 outline-gray-400 hide-number-buttons"
-              />
-              <p className="w-12 font-semibold text-center ">₱120</p>
-
-              <button className="p-1 transition-all rounded-full text-slate-600 hover:bg-gray-200">
-                <HiXCircle />
-              </button>
-            </div> */}
           </div>
         </div>
         {/* bottom */}
@@ -195,8 +188,15 @@ function Home() {
           <div className="flex gap-2 mt-2">
             <button
               onClick={handlePay}
-              className="flex-1 p-2 font-semibold text-white transition-all bg-orange-500 rounded-sm shadow active:scale-x-95">
-              Pay
+              className="flex items-center justify-center flex-1 gap-2 p-2 font-semibold text-white transition-all bg-orange-500 rounded-sm shadow active:scale-x-95">
+              {isNewTransactionLoading ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Paying
+                </>
+              ) : (
+                "Pay"
+              )}
             </button>
             <button className="flex-1 p-2 font-semibold text-white transition-all bg-green-500 rounded-sm shadow active:scale-95">
               Print

@@ -1,7 +1,8 @@
 import React from "react";
+import Menu from "../../components/Menu/Menu";
 
 function Dessert() {
-  return <div>Dessert</div>;
+  return <Menu />;
 }
 
 export default Dessert;

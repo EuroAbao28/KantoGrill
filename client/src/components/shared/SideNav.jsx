@@ -33,17 +33,6 @@ function SideNav() {
           </Link>
         ))}
       </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center text-sm flex-col justify-center">
-          <div className="rounded-full bg-slate-300 w-14 aspect-square"></div>
-        </div>
-        <div
-          onClick={handleLogout}
-          className="flex flex-col items-center justify-center p-2 text-xs rounded cursor-pointer aspect-square hover:bg-slate-100">
-          <RiLogoutCircleLine fontSize={28} />
-          <span>Logout</span>
-        </div>
-      </div>
     </div>
   );
 }

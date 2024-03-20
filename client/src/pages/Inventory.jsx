@@ -392,7 +392,9 @@ function Inventory() {
                           "text-sm border-t border-gray-300 cursor-pointer hover:bg-slate-50"
                         )}>
                         <td className="px-4 text-xs font-bold">{index + 1}</td>
-                        <td className="py-2">{item.name}</td>
+                        <td className="py-2 line-clamp-1 hover:line-clamp-none">
+                          {item.name}
+                        </td>
                         <td className="whitespace-nowrap">
                           ₱ {item.price?.toFixed(2)}
                         </td>

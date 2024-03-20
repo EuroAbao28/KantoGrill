@@ -1,7 +1,8 @@
 import React from "react";
+import Menu from "../../components/Menu/Menu";
 
 function Soup() {
-  return <div>Soup</div>;
+  return <Menu />;
 }
 
 export default Soup;

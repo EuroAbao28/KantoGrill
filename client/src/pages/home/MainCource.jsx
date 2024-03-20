@@ -1,7 +1,8 @@
 import React from "react";
+import Menu from "../../components/Menu/Menu";
 
 function MainCource() {
-  return <div>MainCource</div>;
+  return <Menu />;
 }
 
 export default MainCource;
