@@ -11,8 +11,11 @@ import useDeleteProduct from "../hooks/products/useDeleteProduct";
 import useCreateProduct from "../hooks/products/useCreateProduct";
 import useUpdateProduct from "../hooks/products/useUpdateProduct";
 import useSearchProduct from "../hooks/products/userSearchProduct";
+import { useUserContext } from "../context/UserContextProvider";
 
 function Inventory() {
+  const { user } = useUserContext();
+
   const [filterOptions, setFilterOptions] = useState({
     category: "",
     status: "",
@@ -263,6 +266,7 @@ function Inventory() {
         <div className="flex flex-col flex-1 gap-2 p-4 bg-white ">
           {/* header */}
           <div className="flex items-center justify-between gap-4">
+            <h1 className="text-xl font-bold">Inventory</h1>
             <form
               onSubmit={handleSearch}
               className="flex items-center w-[20rem] gap-2 p-2 text-sm bg-white rounded outline outline-1 outline-gray-300 mr-auto">
@@ -283,12 +287,13 @@ function Inventory() {
               <HiOutlineFilter />
               Filter
             </div>
-            <div
+            <button
               className="flex items-center gap-1 p-2 text-sm text-white transition-all bg-green-500 rounded shadow-sm cursor-pointer active:scale-95"
-              onClick={toggleCreateModal}>
+              onClick={toggleCreateModal}
+              disabled={user?.adminType !== "super_admin"}>
               <HiPlus />
               Create
-            </div>
+            </button>
           </div>
 
           {/* filter div */}
@@ -467,11 +472,13 @@ function Inventory() {
               <div className="flex items-end flex-1 gap-4">
                 <button
                   onClick={toggleEditModal}
+                  disabled={user?.adminType !== "super_admin"}
                   className="flex-1 py-2 text-base transition-all bg-white rounded shadow-sm cursor-pointer active:scale-95 outline outline-1 outline-gray-300">
                   Edit
                 </button>
                 <button
                   onClick={toggleDeleteMOdal}
+                  disabled={user?.adminType !== "super_admin"}
                   className="flex-1 py-2 text-base text-white transition-all bg-red-500 rounded-sm shadow-sm cursor-pointer active:scale-95 ">
                   Delete
                 </button>
@@ -685,21 +692,15 @@ function Inventory() {
                     className="text-2xl font-medium leading-6 text-center text-gray-900">
                     Update Product
                   </Dialog.Title>
-                  <form className="flex flex-col mt-8 " onSubmit={handleCreate}>
+                  <form className="flex flex-col mt-8 " onSubmit={handleUpdate}>
                     <div className="flex gap-4">
                       <div className="w-2/5 aspect-square">
                         <div className="w-full h-full overflow-hidden rounded ">
-                          {updateForm.productImageURL === null ? (
-                            <div
-                              data-theme="light"
-                              className="w-full h-full skeleton bg-slate-50"></div>
-                          ) : (
-                            <img
-                              className="object-cover w-full h-full "
-                              src={updateForm.productImageURL}
-                              alt="Product"
-                            />
-                          )}
+                          <img
+                            className="object-cover w-full h-full "
+                            src={updateForm.productImageURL}
+                            alt="Product"
+                          />
                         </div>
                       </div>
                       <div className="flex flex-col flex-1 gap-2">

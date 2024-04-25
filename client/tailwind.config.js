@@ -4,7 +4,7 @@ export default {
 
   daisyui: {
     themes: false,
-    styled: false,
+    styled: true,
   },
 
   plugins: [require("daisyui")],

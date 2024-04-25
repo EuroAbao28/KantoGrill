@@ -6,96 +6,139 @@ const { hashPassword, comparePassword } = require("../utils/passwordUtils");
 
 const createNewUser = async (req, res) => {
   try {
-    const { username, firstname, middlename, lastname, password, adminType } =
-      req.body;
+    const {
+      firstname,
+      lastname,
+      username,
+      adminType,
+      password,
+      confirmPassword,
+    } = req.body;
+
+    const { firstname: userFirstname, lastname: userLastname } = req.user;
 
     if (
-      !username ||
       !firstname ||
       !lastname ||
-      !password ||
+      !username ||
       !adminType ||
+      !password ||
+      !confirmPassword ||
       !req.file
     )
       return res.status(400).json({ message: "All fields are required" });
 
-    // check if the username already exist
-    const isUsernameExist = await userModel.findOne({ username });
+    // check if the firstname and lastname is already exist
+    const isUserExist = await userModel.find({ username });
 
-    // check if the user data already exist
-    const isUserExist = await userModel.findOne({
-      firstname,
-      middlename,
-      lastname,
-    });
+    if (isUserExist && isUserExist.length > 0)
+      return res.status(400).json({
+        message: "Username already exist",
+        isUserExist,
+      });
 
-    if (isUsernameExist)
-      return res.status(400).json({ message: "Username already exist" });
-
-    if (isUserExist)
-      return res.status(400).json({ message: "User data already exist" });
-
-    // updload the image cloudinary
-    const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
-      folder: "Kanto_Grill/Admin_Images",
-    });
-
-    if (!cloudinaryResponse.public_id)
-      return res.status(500).json({ message: "Uploading image failed" });
-
-    // if image upload is success then proceed
+    // check if the password and confirmPassword are not matched
+    if (password !== confirmPassword)
+      return res.status(400).json({
+        message: "Passwords do not match",
+      });
 
     // hash the password
     const hashedPassword = await hashPassword(password, 10);
 
-    // create new user
-    await userModel.create({
-      username,
-      firstname,
-      middlename,
-      lastname,
-      password: hashedPassword,
-      adminType,
-      imageUrl: cloudinaryResponse.secure_url,
-      public_id: cloudinaryResponse.public_id,
+    // upload image to Cloudinary
+    const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
+      folder: "Kanto_Grill/Admin_Images",
     });
 
-    return res.status(201).json({ message: "New user created" });
+    // check if the cloudinary upload is success
+    if (!cloudinaryResponse.public_id)
+      return res.status(500).json({
+        message: "Cloudinary upload failed",
+      });
+
+    // if success, create a new user object
+    const newUser = {
+      createdBy: `${userFirstname} ${userLastname}`,
+      firstname,
+      lastname,
+      username,
+      adminType,
+      password: hashedPassword,
+      imageUrl: cloudinaryResponse.secure_url,
+      imagePublicId: cloudinaryResponse.public_id,
+    };
+
+    // save the object in the db
+    const response = await userModel.create(newUser);
+
+    return res.status(201).json({ message: "New user added" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Internal Server Error", error });
+    return res.json(error);
   }
 };
 
-const editUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstname, middlename, lastname, password, profilePic } = req.body;
+    const {
+      firstname,
+      lastname,
+      username,
+      adminType,
+      password,
+      confirmPassword,
+    } = req.body;
 
-    let hashedPassword;
+    let updatedImageUrl = "";
+    let updatedPassword = "";
 
-    const user = await userModel.findById(id);
+    const isUserExist = await userModel.findById(id);
 
-    if (!user) return res.status(404).json({ mesage: "User not found" });
+    if (!isUserExist)
+      return res.status(404).json({ message: "User not found" });
 
-    if (password) hashedPassword = await hashPassword(password, 10);
+    // if the user uploaded an image, update the image in cloudinary
+    if (req.file) {
+      const cloudinaryResponse = await cloudinary.uploader.upload(
+        req.file.path,
+        { public_id: isUserExist.imagePublicId }
+      );
 
-    // update if may laman ang specific field galing sa req.body
-    // if firstname is true, then yan ilalagay
-    // pag wala naman edi false, so iaasign nya nalang yung existing na laman nya
-    user.firstname = firstname || user.firstname;
-    user.middlename = middlename || user.middlename;
-    user.lastname = lastname || user.lastname;
-    user.password = hashedPassword || user.password;
-    user.profilePic = profilePic || user.profilePic;
+      // pass the updated image url in the let variable
+      updatedImageUrl = cloudinaryResponse.secure_url;
+    }
 
-    // save the updated user
-    await user.save();
+    // check if user entered a new password
+    if (password && confirmPassword) {
+      // check if the password are matched
+      if (password !== confirmPassword) {
+        return res.status(404).json({ message: "Passwords do not match" });
+      }
 
-    return res.status(200).json({ message: "User updated successfully" });
+      // hash and put the new password in the updatedPassword variable
+      updatedPassword = await hashPassword(password, 10);
+    }
+
+    // update the value base on which is true
+    if (firstname) isUserExist.firstname = firstname;
+    if (lastname) isUserExist.lastname = lastname;
+    if (username) isUserExist.username = username;
+    if (adminType) isUserExist.adminType = adminType;
+    if (updatedPassword) isUserExist.password = updatedPassword;
+    if (updatedImageUrl) isUserExist.imageUrl = updatedImageUrl;
+
+    // save the updated value
+    const updatedUser = await isUserExist.save();
+
+    return res.status(201).json({
+      message: "Updated successfully",
+      updatedUser,
+    });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Internal Server Error", error });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -108,16 +151,16 @@ const deleteUser = async (req, res) => {
     if (!isUserExist)
       return res.status(404).json({ message: "User not found" });
 
-    // delete the user in mongodb
+    // delete the product in mongodb
     await userModel.findByIdAndDelete(id);
 
     // delete the image in cloudinary
-    await cloudinary.uploader.destroy(isUserExist.public_id);
+    await cloudinary.uploader.destroy(isUserExist.imagePublicId);
 
-    return res.status(200).json({ message: "User deleted succesfully" });
+    return res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Internal Server Error", error });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -149,7 +192,23 @@ const login = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   try {
-    const allUsers = await userModel.find();
+    let query = {};
+
+    // Check if query parameter 'search' exists
+    if (req.query.search) {
+      // Create a regular expression to perform a case-insensitive search
+      const searchRegex = new RegExp(req.query.search, "i");
+      // Define the search criteria
+      query = {
+        $or: [
+          { firstname: searchRegex },
+          { lastname: searchRegex },
+          { username: searchRegex },
+        ],
+      };
+    }
+
+    const allUsers = await userModel.find(query);
     return res.status(200).json(allUsers);
   } catch (error) {
     console.log(error);
@@ -164,7 +223,7 @@ const checkUser = (req, res) => {
 
 module.exports = {
   createNewUser,
-  editUser,
+  updateUser,
   deleteUser,
   login,
   getAllUser,

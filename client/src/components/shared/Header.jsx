@@ -8,7 +8,7 @@ import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 
 function Header() {
-  const { user } = useUserContext();
+  const { user, setUser } = useUserContext();
   const navigate = useNavigate();
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -19,6 +19,7 @@ function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("userToken");
+    setUser(null);
     navigate("/login");
   };
 
@@ -33,15 +34,19 @@ function Header() {
         </div>
 
         <div className="dropdown dropdown-end">
-          <div tabIndex="0" role="button" className="btn">
+          <div tabIndex="0" role="button">
             <div className="flex items-center gap-3 cursor-pointer">
               <div className="flex flex-col">
-                <p className="text-sm font-semibold">Orue Abao</p>
-                <p className="-mt-1 text-xs text-gray-500">Super Admin</p>
+                <p className="text-sm font-semibold">
+                  {user?.firstname} {user?.lastname}
+                </p>
+                <p className="-mt-1 text-xs text-gray-500 capitalize text-end">
+                  {user?.adminType.split("_").join(" ")}
+                </p>
               </div>
               <img
                 className="object-cover rounded-full w-11"
-                src={user ? user.imageUrl : ""}
+                src={user?.imageUrl}
                 alt="image"
               />
             </div>

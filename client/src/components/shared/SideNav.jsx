@@ -2,18 +2,9 @@ import React from "react";
 import { SIDENAV_LINKS } from "../../constants/sideNav";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import classNames from "classnames";
-import { RiLogoutCircleLine } from "react-icons/ri";
-import { useUserContext } from "../../context/UserContextProvider";
 
 function SideNav() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const { user } = useUserContext();
-
-  const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    navigate("/login");
-  };
 
   return (
     <div className="flex flex-col justify-between px-2 py-4 bg-white shadow-sm">

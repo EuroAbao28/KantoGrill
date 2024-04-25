@@ -1,17 +1,21 @@
 const mongoose = require("mongoose");
 
+const reqString = {
+  type: String,
+  required: true,
+};
+
 const adminSchema = mongoose.Schema(
   {
-    username: { type: String, required: true, unique: true },
-    firstname: { type: String, required: true },
-    middlename: { type: String },
-    lastname: { type: String, required: true },
-    password: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    public_id: { type: String, required: true },
+    createdBy: reqString,
+    username: { ...reqString, unique: true },
+    firstname: reqString,
+    lastname: reqString,
+    password: reqString,
+    imageUrl: reqString,
+    imagePublicId: reqString,
     adminType: {
-      type: String,
-      required: true,
+      ...reqString,
       enum: ["cashier", "admin", "super_admin"],
     },
   },

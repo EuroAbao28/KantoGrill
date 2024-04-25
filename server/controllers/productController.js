@@ -54,7 +54,7 @@ const addNewItem = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.json(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -72,13 +72,13 @@ const updateItem = async (req, res) => {
 
     // if the user uploaded an image, update the image in cloudinary
     if (req.file) {
-      const clouudinaryResponse = await cloudinary.uploader.upload(
+      const cloudinaryResponse = await cloudinary.uploader.upload(
         req.file.path,
         { public_id: isProductExist.imagePublicId }
       );
 
       // pass the updated iamge url in the let variable
-      updatedImageUrl = clouudinaryResponse.secure_url;
+      updatedImageUrl = cloudinaryResponse.secure_url;
     }
 
     // update the value base on which is true
@@ -100,7 +100,7 @@ const updateItem = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.json(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
